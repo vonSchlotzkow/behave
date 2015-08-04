@@ -6,6 +6,7 @@ Provides ANSI escape sequences for coloring/formatting output in ANSI terminals.
 from __future__ import absolute_import
 import os
 import re
+import codecs
 
 colors = {
     'black':        u"\x1b[30m",
@@ -35,6 +36,9 @@ aliases = {
 escapes = {
     'reset':        u'\x1b[0m',
     'up':           u'\x1b[1A',
+    'backspace':    u'\x08',
+    'form feed':    u'\x0c',
+    'bel':          u'\a',
 }
 
 if 'GHERKIN_COLORS' in os.environ:
@@ -51,7 +55,25 @@ for alias in aliases:
 def up(n):
     return u"\x1b[%dA" % n
 
-_ANSI_ESCAPE_PATTERN = re.compile(u"\x1b\[\d+[mA]", re.UNICODE)
+
+def escapePatterns():
+    pattern = []
+    pattern.append(re.compile(u"\x1b\[\d+[mA]", re.UNICODE))
+    pattern.append(re.compile(u"\x08", re.UNICODE))
+    pattern.append(re.compile(u"\x0c", re.UNICODE))
+    pattern.append(re.compile(u"\xe2", re.UNICODE))
+    pattern.append(re.compile(u"\a", re.UNICODE))
+    pattern.append(re.compile(u"\b", re.UNICODE))
+    pattern.append(re.compile(u"\4", re.UNICODE))
+    return pattern
+
+# _ANSI_ESCAPE_PATTERN = re.compile(u"\x1b\[\d+[mA]", re.UNICODE)
+# _BACKSPACE_ESCAPE_PATTERN = re.compile(u"\x08", re.UNICODE)
+# _FORM_FEED_ESCAPE_PATTERN = re.compile(u"\x0c", re.UNICODE)
+# _0xe2_ESCAPE_PATTERN = re.compile(u"\xe2", re.UNICODE)
+# _BELL_ESCAPE_PATTERN = re.compile(u"\a", re.UNICODE)
+
+
 def strip_escapes(text):
     """
     Removes ANSI escape sequences from text (if any are contained).
@@ -59,7 +81,11 @@ def strip_escapes(text):
     :param text: Text that may or may not contain ANSI escape sequences.
     :return: Text without ANSI escape sequences.
     """
-    return _ANSI_ESCAPE_PATTERN.sub("", text)
+    newText = text
+    patterns = escapePatterns()
+    for p in patterns:
+        newText = p.sub("", newText)
+    return newText
 
 
 def use_ansi_escape_colorbold_composites():     # pragma: no cover
