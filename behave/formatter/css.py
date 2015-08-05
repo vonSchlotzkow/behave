@@ -32,7 +32,7 @@ body {
 }
 
 .scenario h3:hover {
-    background: #84d033 none repeat scroll 0 0;
+    background-color: #84d033!important;
     cursor: pointer;
 }
 
