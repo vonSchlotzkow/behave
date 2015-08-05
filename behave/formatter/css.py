@@ -31,6 +31,11 @@ body {
     margin:0 0 0 10px
 }
 
+.scenario h3:hover {
+    background: #84d033 none repeat scroll 0 0;
+    cursor: pointer;
+}
+
 .background h3,.behave .scenario h3,td .scenario h3,th .scenario h3 {
     font-size:11px;
     padding:3px;
