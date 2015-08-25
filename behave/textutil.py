@@ -33,6 +33,11 @@ def indent(text, prefix):
     # XXX return newline.join([prefix + six.text_type(line, errors="replace")
     return newline.join([prefix + six.text_type(line)  for line in lines])
 
+    if any([isinstance(line, unicode) for line in lines]):
+        return newline.join([prefix + unicode(line) for line in lines])
+    else:
+        return newline.join([prefix + line.decode('utf-8') for line in lines])
+
 
 def compute_words_maxsize(words):
     """
