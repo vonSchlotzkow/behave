@@ -157,7 +157,7 @@ class HTMLFormatter(Formatter):
             description_element.text = reduce(lambda d, x: "%s\n%s" % (d, x), feature.description)
 
     def background(self, background):
-        self.current_background = ET.SubElement(self.suite, 'div', {'class': 'background'})
+        self.current_background = ET.SubElement(self.current_feature, 'div', {'class': 'background'})
 
         h3 = ET.SubElement(self.current_background, 'h3')
         ET.SubElement(h3, 'span', {'class': 'val'}).text = \
@@ -168,7 +168,7 @@ class HTMLFormatter(Formatter):
     def scenario(self, scenario):
         if scenario.feature not in self.all_features:
             self.all_features.append(scenario.feature)
-        self.scenario_el = ET.SubElement(self.suite, 'div', {'class': 'scenario'})
+        self.scenario_el = ET.SubElement(self.current_feature, 'div', {'class': 'scenario'})
 
         scenario_file = ET.SubElement(self.scenario_el, 'span', {'class': 'scenario_file'})
         scenario_file.text = "%s:%s" % (scenario.location.filename, scenario.location.line)
@@ -211,6 +211,25 @@ class HTMLFormatter(Formatter):
 
     def result(self, result):
         self.last_step = result
+
+        # update feature class according to result status
+        current_feature_class=self.current_feature.attrib["class"]
+        if "failed" == result.status:
+            if current_feature_class in ["feature", "feature passed", "feature failed"]:
+                self.current_feature.attrib["class"] = "feature failed"
+            else:
+                raise
+        elif "passed" == result.status:
+            if current_feature_class in ["feature", "feature passed"]:
+                self.current_feature.attrib["class"] = "feature passed"
+            elif current_feature_class in ["feature failed"]:
+                pass
+            else:
+                raise
+            pass
+        else:
+            raise
+
         step = ET.SubElement(self.steps, 'li', {'class': 'step %s' % result.status})
         step_name = ET.SubElement(step, 'div', {'class': 'step_name'})
 
