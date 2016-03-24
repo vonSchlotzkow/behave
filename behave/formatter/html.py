@@ -36,6 +36,20 @@ function collapsible_toggle(id)
     return false;
 }
 
+function collapsible_toggle_name(name)
+{
+    var elems = document.getElementsByName(name);
+
+    var i = 0;
+    while (i != elems.length)
+    {
+        //elems[i].style.display = 'none';
+        elems[i].style.display = (elems[i].style.display == 'none' ? 'block' : 'none');
+        i++
+    }
+    return false;
+}
+
 function collapsible_expandAll(className)
 {
     var elems = document.getElementsByClassName(className);
@@ -106,7 +120,7 @@ class HTMLFormatter(Formatter):
         # script.append(script_text)
 
         self.stream = self.open()
-        body = ET.SubElement(self.html, 'body')
+        body = ET.SubElement(self.html, 'body', {'onload': "collapsible_collapseAll('scenario');"})
         self.suite = ET.SubElement(body, 'div', {'class': 'behave'})
 
         #Summary
@@ -126,12 +140,12 @@ class HTMLFormatter(Formatter):
         # -- PART: Expand/Collapse All
         expand_collapse = ET.SubElement(summary, 'div', id='expand-collapse')
         expander = ET.SubElement(expand_collapse, 'a', id='expander', href="#")
-        expander.set('onclick', "collapsible_expandAll('scenario_steps')")
+        expander.set('onclick', "collapsible_expandAll('scenario')")
         expander.text = u'Expand All'
         cea_spacer = ET.SubElement(expand_collapse, 'span')
         cea_spacer.text = u" | "
         collapser = ET.SubElement(expand_collapse, 'a', id='collapser', href="#")
-        collapser.set('onclick', "collapsible_collapseAll('scenario_steps')")
+        collapser.set('onclick', "collapsible_collapseAll('scenario')")
         collapser.text = u'Collapse All'
 
         self.embed_id = 0
@@ -149,7 +163,7 @@ class HTMLFormatter(Formatter):
         if feature.tags:
             tags_element = ET.SubElement(self.current_feature, 'span', {'class': 'tag'})
             tags_element.text = u'@' + reduce(lambda d, x: "%s, @%s" % (d, x), feature.tags)
-        h2 = ET.SubElement(self.current_feature, 'h2')
+        h2 = ET.SubElement(self.current_feature, 'h2', {'onclick': "collapsible_toggle_name('"+"feature_"+str(feature.name)+"')"})
         feature_element = ET.SubElement(h2, 'span', {'class': 'val'})
         feature_element.text = u'%s: %s' % (feature.keyword, feature.name)
         if feature.description:
@@ -168,7 +182,8 @@ class HTMLFormatter(Formatter):
     def scenario(self, scenario):
         if scenario.feature not in self.all_features:
             self.all_features.append(scenario.feature)
-        self.scenario_el = ET.SubElement(self.current_feature, 'div', {'class': 'scenario'})
+        feature_name="feature_"+str(scenario.feature.name)
+        self.scenario_el = ET.SubElement(self.current_feature, 'div', {'class': 'scenario', 'name': feature_name})
 
         scenario_file = ET.SubElement(self.scenario_el, 'span', {'class': 'scenario_file'})
         scenario_file.text = "%s:%s" % (scenario.location.filename, scenario.location.line)
